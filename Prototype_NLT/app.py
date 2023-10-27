@@ -55,17 +55,3 @@ with st.sidebar:
     st.subheader('Sessions')
     st.button('Debug', on_click=reset_prompt)
 
-<<<<<<< HEAD
-if st.button(label="Generate"):
-    heure = time()
-    ret = Call_GPT(Prompt)
-    st.write(ret)
-    duree = round((time() - heure), 2)
-    st.write(f" Le résultat a mis {duree} secondes à être généré")
-    insert_in_database(Prompt, ret, name)
-    sessions, client = get_database(name)
-    for session in sessions:
-        st.markdown(f"Username: {session['username']}<br>Prompt: {session['prompt']}<br>Result: {session['result']}", unsafe_allow_html=True)
-    close_connection(client)
-=======
->>>>>>> 92ddffe25c9730a230dca831781420dd0c300770
