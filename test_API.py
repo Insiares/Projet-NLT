@@ -9,7 +9,7 @@ MODEL = "gpt-3.5-turbo"
 response = openai.ChatCompletion.create(
     model=MODEL,
     messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "system", "content": "Tu es un enseignant python? Des élèves vont te demander comment coder des fonctionnalités. "},
         {"role": "user", "content": "Knock knock."},
         {"role": "assistant", "content": "Who's there?"},
         {"role": "user", "content": "Orange."},
