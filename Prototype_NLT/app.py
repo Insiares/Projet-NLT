@@ -1,8 +1,11 @@
 from Components.Call_API import Call_GPT
 import streamlit as st
+from time import time, sleep
+from Database.mongodb import insert_in_database, get_database, close_connection
 
 st.title("Prototype Chat_GPT")
 
+name = st.text_input(label= 'Nom',label_visibility='hidden',placeholder=f"Entrez votre nom")
 Prompt = st.text_area(label= 'prompt',label_visibility='hidden',placeholder=f"Décris-moi la fonction Python souhaitée :")
 
 if 'prompted' not in st.session_state:
@@ -31,7 +34,13 @@ cols_bot1, cols_bot2 = st.columns(2)
 
 
 if bip:
+    heure = time()
     ret = Call(Prompt)
+    duree = round((time() - heure), 2)
+    st.write(f" Le résultat a mis {duree} secondes à être généré")
+    insert_in_database(Prompt, ret, name)
+    sessions, client = get_database(name)
+    close_connection(client)
     with cols_bot1:
         Output = st.text_area(label='AI Output', value=ret)
     with cols_bot2:
