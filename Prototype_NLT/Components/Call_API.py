@@ -6,6 +6,8 @@ openai.api_key = os.getenv("OPEN_API_KEY")
 def Call_GPT(prompt) : 
     completion = openai.ChatCompletion.create(
     model="gpt-3.5-turbo", 
-    messages=[{"role": "user", "content": prompt}]
+    messages=[{"role": "user", "content": prompt}
+    ],
+    # stream = True
 )
     return (completion['choices'][0]['message']['content'])
