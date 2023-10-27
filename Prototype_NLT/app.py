@@ -29,10 +29,13 @@ with cols_up2:
 cols_bot1, cols_bot2 = st.columns(2)
 
 
+
 if bip:
     ret = Call(Prompt)
     with cols_bot1:
-        st.write(ret)
+        Output = st.text_area(label='AI Output', value=ret)
+    with cols_bot2:
+        st.markdown(Output)
     with cols_up2:
         st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
 
