@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo:5.0  # Utilisation de l'image Docker officielle de MongoDB version 5.0
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: bdd_gpt  # Nom de la base de données à créer
+    ports:
+      - 27017:27017  # Mapping du port 27017 du conteneur au port 27017 de l'hôte
+
+
+# docker context create compose
+# docker-compose -f docker-compose.yml up -d
