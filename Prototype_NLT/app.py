@@ -11,6 +11,20 @@ Prompt = st.text_area(label= 'prompt',label_visibility='hidden',placeholder=f"D�
 if 'prompted' not in st.session_state:
     st.session_state.prompted = False
 
+def variable_session(index_session):
+    if index_session == 0:
+        ret= None
+        Prompt = None
+        Name = None
+
+    else: 
+        list_session_db= [y for y in sessions]
+        dict_session = list_session_db[index_session]
+        ret = dict_session['result']
+        name = dict_session['username']
+        prompt = dict_session['prompt']
+    return ret, name, prompt
+
 def click_prompt():
     st.session_state.prompted = True
 
@@ -18,6 +32,10 @@ cols_up1, cols_up2 = st.columns([3,1])
 
 def reset_prompt():
     st.session_state.prompted = False
+
+with st.sidebar:
+    st.subheader('Sessions')
+    st.button('Debug', on_click=reset_prompt)
 
 #Caching API Call
 @st.cache_data
@@ -31,27 +49,31 @@ with cols_up2:
 #splitting bottom of page
 cols_bot1, cols_bot2 = st.columns(2)
 
-
+ret = None
 
 if bip:
     heure = time()
     ret = Call(Prompt)
     duree = round((time() - heure), 2)
     st.write(f" Le résultat a mis {duree} secondes à être généré")
+
+if ret is not None:
     insert_in_database(Prompt, ret, name)
     sessions, client = get_database(name)
-    close_connection(client)
-    with cols_bot1:
-        Output = st.text_area(label='AI Output', value=ret)
-    with cols_bot2:
-        st.markdown(Output)
-    with cols_up2:
-        st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
+
+with cols_bot1:
+    Output = st.text_area(label='AI Output', value=ret)
+with cols_bot2:
+    st.markdown(Output)
+with cols_up2:
+    st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
 
         
 #Declaring a sidebar with session History
+with st.sidebar: 
+    list_session = [y['prompt'] for y in sessions]
+    list_session.insert(0, 'New_prompt')
+    st.radio('Select Past Prompt', [str(y[:25]+'...') for y in list_session])
 
-with st.sidebar:
-    st.subheader('Sessions')
-    st.button('Debug', on_click=reset_prompt)
 
+# close_connection(client)
