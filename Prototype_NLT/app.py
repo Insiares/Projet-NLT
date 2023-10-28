@@ -1,8 +1,8 @@
-from Components.Call_API import Call_GPT
+from Components.Call_API import call_gpt
 from Components.utils_streamlit import variable_session, click_prompt, reset_prompt
 import streamlit as st
-from time import time, sleep
-from Database.mongodb import insert_in_database, get_database, close_connection, connection_mongodb
+from time import time
+from Database.mongodb import insert_in_database, get_database, close_connection
 
 #-----------------------------------------------Declare logics----------------------------------------
 if 'prompted' not in st.session_state:
@@ -11,13 +11,7 @@ if 'prompted' not in st.session_state:
 with st.sidebar:
     st.subheader('Sessions')
     st.button('Debug', on_click=reset_prompt)
-    name = st.text_input(label= 'Nom',label_visibility='hidden',placeholder=f"Entrez votre nom")
-
-#Caching API Call
-@st.cache_data
-def Call(Input):
-    output = Call_GPT(Input)
-    return output
+    name = st.text_input(label= 'Nom',label_visibility='hidden',placeholder=f"Entrez votre nom", value='Anonyme')
 
 #Declaring a sidebar with session History
 with st.sidebar: 
@@ -58,7 +52,7 @@ cols_bot1, cols_bot2 = st.columns(2)
 
 if bip:
     heure = time()
-    ret = Call(Prompt)
+    ret = call_gpt(Prompt)
     duree = round((time() - heure), 2)
     st.write(f" Le résultat a mis {duree} secondes à être généré")
     insert_in_database(Prompt, ret, name)
