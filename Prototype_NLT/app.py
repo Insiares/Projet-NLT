@@ -2,7 +2,7 @@ from Components.Call_API import Call_GPT
 from Components.utils_streamlit import variable_session, click_prompt, reset_prompt
 import streamlit as st
 from time import time, sleep
-from Database.mongodb import insert_in_database, get_database, close_connection
+from Database.mongodb import insert_in_database, get_database, close_connection, connection_mongodb
 
 #-----------------------------------------------Declare logics----------------------------------------
 if 'prompted' not in st.session_state:
@@ -37,11 +37,14 @@ with st.sidebar:
 #-----------------------------------------------//Declare logics//----------------------------------------
 
 #-----------------------------------------------Layout ----------------------------------------
+
 st.title("Prototype Chat_GPT")
 
+# # debug db
+# client, collection = connection_mongodb()
 
-# for session in sessions: 
-#     st.write(session['prompt'])
+# for y in collection.find():
+#     st.write(y)
 
 Prompt = st.text_area(label= 'prompt',label_visibility='hidden', value=prompt, key=2)
 
@@ -53,25 +56,24 @@ with cols_up2:
 #splitting bottom of page
 cols_bot1, cols_bot2 = st.columns(2)
 
-
-
 if bip:
     heure = time()
     ret = Call(Prompt)
     duree = round((time() - heure), 2)
     st.write(f" Le résultat a mis {duree} secondes à être généré")
-
-if ret is not None:
     insert_in_database(Prompt, ret, name)
     sessions, client = get_database(name)
     close_connection(client)
 
 with cols_bot1:
-    Output = st.text_area(label='AI Output', value=ret, key=1, height=200)
+    Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key=1, height=200)
+    #TO_DO : on_change= update_DB()
 with cols_bot2:
+    st.write('')
+    st.write('')
     st.markdown(Output)
 with cols_up2:
     st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
 
-        
+  
 close_connection(client)
