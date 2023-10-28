@@ -11,14 +11,16 @@ Prompt = st.text_area(label= 'prompt',label_visibility='hidden',placeholder=f"D�
 if 'prompted' not in st.session_state:
     st.session_state.prompted = False
 
-def variable_session(index_session):
+def variable_session(index_session, name):
+    sessions, client = get_database(name)
     if index_session == 0:
         ret= None
-        Prompt = None
-        Name = None
+        prompt = None
+        name = None
 
     else: 
         list_session_db= [y for y in sessions]
+        list_session_db.insert(0, 'New_prompt...')
         dict_session = list_session_db[index_session]
         ret = dict_session['result']
         name = dict_session['username']
@@ -57,23 +59,30 @@ if bip:
     duree = round((time() - heure), 2)
     st.write(f" Le résultat a mis {duree} secondes à être généré")
 
+
 if ret is not None:
     insert_in_database(Prompt, ret, name)
     sessions, client = get_database(name)
+    close_connection(client)
+
+#Declaring a sidebar with session History
+with st.sidebar: 
+    sessions, client = get_database(name)
+    list_session_prompt = [str(y['prompt'][:25]+'...') for y in sessions]
+    list_session_prompt.insert(0, 'New_prompt...')
+    selected_option = st.radio('Select Past Prompt', [y for y in list_session_prompt])
+    if selected_option != 'New_prompt...':
+        selected_index = list_session_prompt.index(selected_option)
+        ret_, nom, prompt = variable_session(selected_index, name)
+        ret=ret_
+
 
 with cols_bot1:
-    Output = st.text_area(label='AI Output', value=ret)
+    Output = st.text_area(label='AI Output', value=ret, key=1)
 with cols_bot2:
     st.markdown(Output)
 with cols_up2:
     st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
 
         
-#Declaring a sidebar with session History
-with st.sidebar: 
-    list_session = [y['prompt'] for y in sessions]
-    list_session.insert(0, 'New_prompt')
-    st.radio('Select Past Prompt', [str(y[:25]+'...') for y in list_session])
-
-
-# close_connection(client)
+close_connection(client)
