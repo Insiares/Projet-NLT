@@ -1,12 +1,19 @@
 from Components.Call_API import call_gpt
 from Components.utils_streamlit import variable_session, click_prompt, reset_prompt
 import streamlit as st
-from time import time
+from time import time, sleep
+import random
+from execbox import execbox
 from Database.mongodb import insert_in_database, get_database, close_connection
+import sys
+from io import StringIO
 
 #-----------------------------------------------Declare logics----------------------------------------
 if 'prompted' not in st.session_state:
     st.session_state.prompted = False
+
+if 'update' not in st.session_state:
+    st.session_state.update = False
 
 with st.sidebar:
     st.subheader('Sessions')
@@ -50,6 +57,7 @@ with cols_up2:
 #splitting bottom of page
 cols_bot1, cols_bot2 = st.columns(2)
 
+
 if bip:
     heure = time()
     ret = call_gpt(Prompt)
@@ -59,15 +67,42 @@ if bip:
     sessions, client = get_database(name)
     close_connection(client)
 
+
 with cols_bot1:
     Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key=1, height=200)
     #TO_DO : on_change= update_DB()
+    # bouton pour exécuter le code
+    if st.button("Exécuter le code"):
+
+        result = st.empty()  # Créez espace vide
+        # Rediriger vers un tampon
+        old_stdout = sys.stdout
+        new_stdout = StringIO()
+        sys.stdout = new_stdout
+
+        try:
+            # Exécutez le code
+            st.code(Output, language="python")
+            exec(Output)
+            result_text = new_stdout.getvalue()
+            result.text(result_text)
+            
+        except Exception as e:
+            st.error(f"Une erreur s'est produite : {e}")
+
+        finally:
+            # Restaurer
+            sys.stdout = old_stdout
+
+
 with cols_bot2:
     st.write('')
     st.write('')
     st.markdown(Output)
-with cols_up2:
-    st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
 
+    with cols_up2:
+        st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
+
+    
   
 close_connection(client)

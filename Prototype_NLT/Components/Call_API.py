@@ -14,7 +14,7 @@ def call_gpt(prompt):
         {"role": "system", 
          "content": '''You are a Python programming assistant. 
          Please respond succinctly. 
-         Only code or comments within a single code block in markdown are allowed.
+         Only code unformatted allowed.
          Do not write text outside the code block.
          '''},
         {"role": "user", "content": "give me a function for addition"},
