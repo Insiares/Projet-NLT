@@ -7,6 +7,7 @@ from execbox import execbox
 from Database.mongodb import insert_in_database, get_database, close_connection
 import sys
 from io import StringIO
+import openai
 
 #-----------------------------------------------Declare logics----------------------------------------
 if 'prompted' not in st.session_state:
@@ -35,7 +36,6 @@ with st.sidebar:
         ret = None
         prompt = None
 
-#-----------------------------------------------//Declare logics//----------------------------------------
 
 #-----------------------------------------------Layout ----------------------------------------
 
@@ -68,41 +68,47 @@ if bip:
     close_connection(client)
 
 
-with cols_bot1:
-    Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key=1, height=200)
-    #TO_DO : on_change= update_DB()
-    # bouton pour exécuter le code
-    if st.button("Exécuter le code"):
+# with cols_bot1:
+    # Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key=1, height=200)
+    # #TO_DO : on_change= update_DB()
+    # # bouton pour exécuter le code
+    # excute_code = st.button("Exécuter le code")
+  
 
-        result = st.empty()  # Créez espace vide
-        # Rediriger vers un tampon
-        old_stdout = sys.stdout
-        new_stdout = StringIO()
-        sys.stdout = new_stdout
+   
+# with cols_bot2:
+#     st.write('')
+#     st.write('')
+#     st.markdown(Output)
 
-        try:
-            # Exécutez le code
-            st.code(Output, language="python")
-            exec(Output)
-            result_text = new_stdout.getvalue()
-            result.text(result_text)
-            
-        except Exception as e:
-            st.error(f"Une erreur s'est produite : {e}")
-
-        finally:
-            # Restaurer
-            sys.stdout = old_stdout
+    # with cols_up2:
+    #     st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
 
 
-with cols_bot2:
-    st.write('')
-    st.write('')
-    st.markdown(Output)
+# result = st.empty()  # Créez espace vide
 
-    with cols_up2:
-        st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
+
+
+# if excute_code:
+     # Rediriger vers un tampon
+
+old_stdout = sys.stdout
+new_stdout = StringIO()
+sys.stdout = new_stdout
+try:
+    if ret:
+        # Exécutez le code
+        execbox(ret)
+        # exec(str(Output))
+        result_text = new_stdout.getvalue()
+        st.write(result_text)
 
     
-  
+except Exception as e:
+    st.error(f"Une erreur s'est produite : {e}")
+
+finally:
+    # Restaurer
+    sys.stdout = old_stdout
+
 close_connection(client)
