@@ -1,17 +1,29 @@
 from Components.Call_API import call_gpt
 from Components.utils_streamlit import variable_session, click_prompt, reset_prompt
 import streamlit as st
-from time import time
+from time import time, sleep
+import random
+from execbox import execbox
 from Database.mongodb import insert_in_database, get_database, close_connection
+
+import sys
+from io import StringIO
+import openai
 from execbox import execbox
 import pandas as pd
+
 
 #-----------------------------------------------Declare logics----------------------------------------
 if 'prompted' not in st.session_state:
     st.session_state.prompted = False
 
+
+if 'update' not in st.session_state:
+    st.session_state.update = False
+
 if 'outy' not in st.session_state:
     st.session_state.outy = ''
+
 
 with st.sidebar:
     st.subheader('Sessions')
@@ -33,9 +45,12 @@ with st.sidebar:
         ret = None
         prompt = None
 
+
+
 def update():
     print(st.session_state.outy)
 #-----------------------------------------------//Declare logics//----------------------------------------
+
 
 #-----------------------------------------------Layout ----------------------------------------
 
@@ -57,6 +72,7 @@ with cols_up2:
 #splitting bottom of page
 cols_bot1, cols_bot2 = st.columns(2)
 
+
 if bip:
     heure = time()
     ret = call_gpt(Prompt)
@@ -65,6 +81,24 @@ if bip:
     insert_in_database(Prompt, ret, name)
     sessions, client = get_database(name)
     close_connection(client)
+
+old_stdout = sys.stdout
+new_stdout = StringIO()
+sys.stdout = new_stdout
+try:
+    if ret:
+        # Exécutez le code
+        execbox(ret)
+        # exec(str(Output))
+        result_text = new_stdout.getvalue()
+        st.write(result_text)
+
+except Exception as e:
+    st.error(f"Une erreur s'est produite : {e}")
+
+finally:
+    # Restaurer
+    sys.stdout = old_stdout
 
 with cols_bot1:
     Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key='outy', height=200, on_change=update)
@@ -75,6 +109,7 @@ with cols_bot2:
     st.markdown(Output)
 with cols_up2:
     st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
+
 
 
 close_connection(client)
