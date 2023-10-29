@@ -58,9 +58,9 @@ application
 
 
 ######
-# TODO Faire un fonction update DB -- Value : 3 -- Lionel
-# TODO implémentation la fonction update on_change de la sortie IA -- Value : 3 -- Lionel
-# TODO Pauffinage du prompt -- Value : 3 -- Boris 
+# TODO Faire un fonction update DB -- Value : 3 -- Lionel OK
+# TODO implémentation la fonction update on_change de la sortie IA -- Value : 3 -- Lionel OK?
+# TODO Pauffinage du prompt -- Value : 3 -- Boris mid ok
 # TODO implémentation d'un champ de code éditable : 8 -- Joachim
 # TODO implémentation de l'execution du champ de code avec sortie standard : 5 -- Joachim
 # TODO Pauffinage de l'app : 2

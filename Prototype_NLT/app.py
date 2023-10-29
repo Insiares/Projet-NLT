@@ -3,10 +3,15 @@ from Components.utils_streamlit import variable_session, click_prompt, reset_pro
 import streamlit as st
 from time import time
 from Database.mongodb import insert_in_database, get_database, close_connection
+from execbox import execbox
+import pandas as pd
 
 #-----------------------------------------------Declare logics----------------------------------------
 if 'prompted' not in st.session_state:
     st.session_state.prompted = False
+
+if 'outy' not in st.session_state:
+    st.session_state.outy = ''
 
 with st.sidebar:
     st.subheader('Sessions')
@@ -28,6 +33,8 @@ with st.sidebar:
         ret = None
         prompt = None
 
+def update():
+    print(st.session_state.outy)
 #-----------------------------------------------//Declare logics//----------------------------------------
 
 #-----------------------------------------------Layout ----------------------------------------
@@ -60,7 +67,7 @@ if bip:
     close_connection(client)
 
 with cols_bot1:
-    Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key=1, height=200)
+    Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key='outy', height=200, on_change=update)
     #TO_DO : on_change= update_DB()
 with cols_bot2:
     st.write('')
@@ -69,5 +76,5 @@ with cols_bot2:
 with cols_up2:
     st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
 
-  
+
 close_connection(client)
