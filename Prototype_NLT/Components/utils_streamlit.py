@@ -1,4 +1,4 @@
-from Database.mongodb import insert_in_database, get_database, close_connection
+from Database.mongodb import get_database 
 import streamlit as st
 
 def variable_session(index_session, name):

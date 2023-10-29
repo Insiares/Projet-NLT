@@ -60,6 +60,31 @@ def get_database(name):
     # Return the result and the MongoDB client
     return result, client
 
+def update_database(prompt, result_, name, ret_output):
+    """
+    Update the database with the given parameters.
+
+    :param prompt: The prompt to search for.
+    :param result_: The result to search for.
+    :param name: The username to search for.
+    :param ret_output: The new result to update with.
+    """
+    # Connect to MongoDB
+    client, collection = connect_mongodb()
+    
+    # Define the search query
+    search_query = {"prompt": prompt, "result": result_, "username": name}
+    
+    # Define the update operation
+    update_operation = {"$set": {"result": ret_output}}
+    
+    # Update the documents in the collection
+    collection.update_many(search_query, update_operation)
+    
+    # Close the MongoDB connection
+    client.close()
+
+
 def close_connection(client):
     """
     This function closes the connection with the client.
