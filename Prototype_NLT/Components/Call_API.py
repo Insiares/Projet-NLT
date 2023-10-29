@@ -13,7 +13,7 @@ def call_gpt(prompt, langage = 'python', style ='code'):
     langage_dict = { 'python' : 'You are a Python senior programmer.',
                       'JS' : 'You are a JavaScript senior programmer.',
                       'C' : 'You are a C senior programmer.'}
-    style_dict = { 'code' : '''Respond only with none formatted code. 
+    style_dict = { 'code' : '''Respond only with non-formatted code. 
                   Do not write text outside the code block.
                   No example usage.
                   No output example.
