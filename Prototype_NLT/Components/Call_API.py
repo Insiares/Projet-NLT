@@ -4,23 +4,33 @@ import streamlit as st
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def call_gpt(prompt):
+def call_gpt(prompt, langage = 'python', style ='code'):
     """
     This function calls the GPT-3.5-turbo model from OpenAI to generate a response.
     It takes a prompt as input and returns the generated response.
+    WIP : optional arguments to change coding langage and output style (pure code, or pegadogic output)
     """
     # Define the messages for the chat completion
-    messages = [
-        {"role": "system", 
-         "content": '''You are a Python programming assistant. 
-         Please respond succinctly. 
+    langage_dict = { 
+        'python' : 'You are a Python programming assistant.',
+        'JS' : 'You are a JavaScript programming assistant.',
+        'C' : 'You are a C programming assistant.'
+    }
+    
+    style_dict = { 
+        'code' : '''Please respond succinctly. 
          Only code or comments within a single code block in markdown are allowed.
-         Do not write text outside the code block.
-         '''},
-        {"role": "user", "content": "give me a function for addition"},
-        {"role": "assistant", "content": "```def addition(a, b):\n return a + b```"},        
-        {"role": "user", "content": prompt}
-    ]
+         Do not write text outside the code block.''',
+         'pedago' : ''' Please respond with explanations inside the code.
+        Help me understand with comments.
+        Only code or comments within a single code block in markdown are allowed.
+        Do not write text outside the code block.'''
+                 }
+    messages=[
+        {"role": "system", "content": 
+        f'''{langage_dict[langage]} {style_dict[style]}
+        '''},        
+        {"role": "user", "content": prompt}]
 
     # Call the chat completion API from OpenAI
     completion = openai.ChatCompletion.create(
