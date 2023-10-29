@@ -1,29 +1,25 @@
 from Components.Call_API import call_gpt
 from Components.utils_streamlit import variable_session, click_prompt, reset_prompt
 import streamlit as st
-from time import time, sleep
-import random
+from time import time
+from Database.mongodb import insert_in_database, get_database, close_connection, update_database
 from execbox import execbox
-from Database.mongodb import insert_in_database, get_database, close_connection
-
 import sys
 from io import StringIO
 import openai
-from execbox import execbox
 import pandas as pd
+
 
 
 #-----------------------------------------------Declare logics----------------------------------------
 if 'prompted' not in st.session_state:
     st.session_state.prompted = False
 
-
-if 'update' not in st.session_state:
-    st.session_state.update = False
-
-if 'outy' not in st.session_state:
-    st.session_state.outy = ''
-
+if 'ret_output' not in st.session_state:
+    st.session_state.ret_output = "init"
+    
+if 'clef' not in st.session_state:
+    st.session_state.clef = "1"
 
 with st.sidebar:
     st.subheader('Sessions')
@@ -35,7 +31,9 @@ with st.sidebar:
     sessions, client = get_database(name)
     list_session_prompt = [str(y['prompt'][:25]+'...') for y in sessions]
     list_session_prompt.insert(0, 'New_prompt...')
+    sidebar_change = False
     selected_option = st.radio('Select Past Prompt', [y for y in list_session_prompt])
+                            #    , on_change=onchange_sidebar)
     if selected_option != 'New_prompt...':
         selected_index = list_session_prompt.index(selected_option)
         ret_, nom, prompt_ = variable_session(selected_index, name)
@@ -62,7 +60,11 @@ st.title("Prototype Chat_GPT")
 # for y in collection.find():
 #     st.write(y)
 
+# def prompt_change() :
+#     new_prompt = True
+
 Prompt = st.text_area(label= 'prompt',label_visibility='hidden', value=prompt, key=2)
+# , on_change= prompt_change)
 
 cols_up1, cols_up2 = st.columns([3,1])
 
@@ -82,6 +84,16 @@ if bip:
     sessions, client = get_database(name)
     close_connection(client)
 
+
+def update_Output():
+    # print(st.session_state.clef)
+    update_database(Prompt, ret, name, st.session_state.clef)
+
+
+with cols_bot1:
+    Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key='clef', height=200, on_change=update_Output)
+    
+
 old_stdout = sys.stdout
 new_stdout = StringIO()
 sys.stdout = new_stdout
@@ -100,16 +112,13 @@ finally:
     # Restaurer
     sys.stdout = old_stdout
 
-with cols_bot1:
-    Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key='outy', height=200, on_change=update)
-    #TO_DO : on_change= update_DB()
+
 with cols_bot2:
     st.write('')
     st.write('')
     st.markdown(Output)
+    
 with cols_up2:
     st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
-
-
 
 close_connection(client)
