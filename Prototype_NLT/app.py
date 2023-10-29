@@ -76,6 +76,9 @@ with st.sidebar:
         ret_, nom, prompt = variable_session(selected_index, name)
         ret=ret_
 
+sessions, client = get_database(name)
+for session in sessions:
+    st.write(session)
 
 with cols_bot1:
     Output = st.text_area(label='AI Output', value=ret, key=1)
@@ -83,6 +86,5 @@ with cols_bot2:
     st.markdown(Output)
 with cols_up2:
     st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
-
-        
+    
 close_connection(client)

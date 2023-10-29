@@ -1,7 +1,7 @@
 import openai
 import os
 
-openai.api_key = os.getenv("OPEN_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def Call_GPT(prompt) : 
     completion = openai.ChatCompletion.create(
