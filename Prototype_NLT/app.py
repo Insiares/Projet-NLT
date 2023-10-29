@@ -3,12 +3,21 @@ from Components.utils_streamlit import variable_session, click_prompt, reset_pro
 import streamlit as st
 from time import time
 from Database.mongodb import insert_in_database, get_database, close_connection, update_database
+from execbox import execbox
+import sys
+from io import StringIO
+import openai
+import pandas as pd
+
+
+
 #-----------------------------------------------Declare logics----------------------------------------
 if 'prompted' not in st.session_state:
     st.session_state.prompted = False
 
 if 'ret_output' not in st.session_state:
     st.session_state.ret_output = "init"
+    
 if 'clef' not in st.session_state:
     st.session_state.clef = "1"
 
@@ -34,7 +43,12 @@ with st.sidebar:
         ret = None
         prompt = None
 
+
+
+def update():
+    print(st.session_state.outy)
 #-----------------------------------------------//Declare logics//----------------------------------------
+
 
 #-----------------------------------------------Layout ----------------------------------------
 
@@ -60,6 +74,7 @@ with cols_up2:
 #splitting bottom of page
 cols_bot1, cols_bot2 = st.columns(2)
 
+
 if bip:
     heure = time()
     ret = call_gpt(Prompt)
@@ -69,6 +84,7 @@ if bip:
     sessions, client = get_database(name)
     close_connection(client)
 
+
 def update_Output():
     # print(st.session_state.clef)
     update_database(Prompt, ret, name, st.session_state.clef)
@@ -77,6 +93,26 @@ def update_Output():
 with cols_bot1:
     Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key='clef', height=200, on_change=update_Output)
     
+
+old_stdout = sys.stdout
+new_stdout = StringIO()
+sys.stdout = new_stdout
+try:
+    if ret:
+        # Exécutez le code
+        execbox(ret)
+        # exec(str(Output))
+        result_text = new_stdout.getvalue()
+        st.write(result_text)
+
+except Exception as e:
+    st.error(f"Une erreur s'est produite : {e}")
+
+finally:
+    # Restaurer
+    sys.stdout = old_stdout
+
+
 with cols_bot2:
     st.write('')
     st.write('')
@@ -84,6 +120,5 @@ with cols_bot2:
     
 with cols_up2:
     st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
-
 
 close_connection(client)
