@@ -1,21 +1,34 @@
 import openai
 import os
+import streamlit as st
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def Call_GPT(prompt) : 
+def call_gpt(prompt):
+    """
+    This function calls the GPT-3.5-turbo model from OpenAI to generate a response.
+    It takes a prompt as input and returns the generated response.
+    """
+    # Define the messages for the chat completion
+    messages = [
+        {"role": "system", 
+         "content": '''You are a Python programming assistant. 
+         Please respond succinctly. 
+         Only code or comments within a single code block in markdown are allowed.
+         Do not write text outside the code block.
+         '''},
+        {"role": "user", "content": "give me a function for addition"},
+        {"role": "assistant", "content": "```def addition(a, b):\n return a + b```"},        
+        {"role": "user", "content": prompt}
+    ]
+
+    # Call the chat completion API from OpenAI
     completion = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo", 
-    messages=[
-        {"role": "system", "content": 
-        '''"Tu es un assistant de programmation en python 3, tu réponds de manière succinte. 
-        je ne veux en retour que du code ou des commentaires, à l'intérieur d'un unique bloc de code en markdown.
-        Il est interdit d'écrire du texte en dehors du bloc de code.'''},
-        {"role": "user", "content": '''donne moi une fonction d'addition'''},
-        {"role": "assistant", "content":" ```def addition(a, b): \n return a + b``` "},        
-        {"role": "user", "content": prompt}],
-    temperature=0,
-    max_tokens=100,
-    # stream=True,
-)
-    return (completion['choices'][0]['message']['content'])
+        model="gpt-3.5-turbo", 
+        messages=messages,
+        temperature=0,
+        max_tokens=100,
+    )
+
+    # Return the generated response
+    return completion['choices'][0]['message']['content']
