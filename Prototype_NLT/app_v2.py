@@ -38,6 +38,9 @@ def excecuter(retour=st.session_state.result):
     finally:
         # Restaurer
         sys.stdout = old_stdout
+
+
+
 # ------------------------- App Layout ------------------------------------
 #title
 st.title('NLT By LesNuls')
@@ -62,25 +65,42 @@ with st.sidebar:
    
     option = st.radio(label='Select Past Prompt',options=[y for y in list_session_prompt])
 
-    if option is not None:
-        selected_index = list_session_prompt.index(option)
-        ret_, nom, prompt_ = variable_session((selected_index), st.session_state.name)
-        st.session_state.result =ret_
-        st.session_state.prompt = prompt_
+    # if option is not None:
+    #     selected_index = list_session_prompt.index(option)
+    #     ret_, nom, prompt_ = variable_session((selected_index), st.session_state.name)
+    #     st.session_state.result =ret_
+    #     st.session_state.prompt = prompt_
 
-    elif option is None:
-        list_session_prompt.insert(0, 'Empty Prompt')
-        st.session_state.result = ' '
-        st.session_state.prompt = ' '
+    if st.button('Load'):
+        if option is not None:
+            selected_index = list_session_prompt.index(option)
+            ret_, nom, prompt_ = variable_session((selected_index), st.session_state.name)
+            st.session_state.result =ret_
+            st.session_state.prompt = prompt_
+
+        if option is None:
+            list_session_prompt.insert(0, 'Empty Prompt')
+            st.session_state.result = ' '
+            st.session_state.prompt = ' '
+    theme = st.selectbox("theme:", ["dark", "light", "contrast"])
+
+    #Select lang
+    choosen_langage = st.selectbox(
+        'Choisissez votre langage',
+        ('python', 'JS', 'C'))
+    language = choosen_langage 
+
+    # with st.expander("Settings"):
+    col_a, col_b, col_c, col_cb = st.columns([6,11,3,3])
+    col_c.markdown('<div style="height: 2.5rem;"><br/></div>', unsafe_allow_html=True)
+    col_cb.markdown('<div style="height: 2.5rem;"><br/></div>', unsafe_allow_html=True)
+
+    col_d, col_e, col_f = st.columns([1,1,1])
     
     
 
 
-#Select lang
-choosen_langage = st.selectbox(
-    'Choisissez votre langage',
-    ('python', 'JS', 'C'))
-
+    
 #Input Area for prompt
 st.text_area(
              label_visibility='visible',
@@ -140,16 +160,7 @@ focus=False
 wrap=True
 btns = custom_buttons_alt
 
-theme = st.selectbox("theme:", ["dark", "light", "contrast"])
 
-
-# with st.expander("Settings"):
-col_a, col_b, col_c, col_cb = st.columns([6,11,3,3])
-col_c.markdown('<div style="height: 2.5rem;"><br/></div>', unsafe_allow_html=True)
-col_cb.markdown('<div style="height: 2.5rem;"><br/></div>', unsafe_allow_html=True)
-
-col_d, col_e, col_f = st.columns([1,1,1])
-language = choosen_langage
 
 
 with st.expander("Components"):
@@ -158,10 +169,12 @@ with st.expander("Components"):
 
 
 st.write("### Output:")
+st.write('You can edit your code, run it to save changes.')
 # construct props dictionary (->Ace Editor)
 ace_props = {"style": {"borderRadius": "0px 0px 8px 8px"}}
 response_dict = code_editor(st.session_state.result,  height = height, lang=language, theme=theme, shortcuts=shortcuts, focus=focus, buttons=btns, info=info_bar, props=ace_props, options={"wrap": wrap}, allow_reset=True, key="code_editor_demo")
 
+st.write("### Result:")
 if response_dict['type'] == "submit" and len(response_dict['id']) != 0 and choosen_langage == "python":
     btns = response_dict["text"]
     update_database(prompt=st.session_state.prompt, result=st.session_state.result, new_result=btns, name=st.session_state.name) # update_database(prompt=Prompt, result=ret, new_result=btns, name=name)
