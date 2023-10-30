@@ -68,7 +68,7 @@ def update_database(prompt, result, new_result, name):
     client, collection = connect_mongodb()
 
     # Update the document in the collection
-    collection.update_many({"prompt": prompt, "result": result, "username": name}, {"$set": {"result": new_result}})
+    collection.update_many({"prompt": prompt, "result": result, "username": name}, {"$set": {"result": new_result}}, upsert=True)
     # Return the result and the MongoDB client
     close_connection(client)
 
