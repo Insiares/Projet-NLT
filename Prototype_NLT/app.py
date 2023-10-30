@@ -1,29 +1,28 @@
 from Components.Call_API import call_gpt
 from Components.utils_streamlit import variable_session, click_prompt, reset_prompt
 import streamlit as st
-from time import time, sleep
-import random
+from time import time
+from Database.mongodb import insert_in_database, get_database, close_connection, update_database
 from execbox import execbox
-from Database.mongodb import insert_in_database, get_database, update_database, close_connection
-
 import sys
-from io import StringIO
 import json
 from code_editor import code_editor
+import sys
+from io import StringIO
+import openai
 import pandas as pd
+
 
 
 #-----------------------------------------------Declare logics----------------------------------------
 if 'prompted' not in st.session_state:
     st.session_state.prompted = False
 
-
-if 'update' not in st.session_state:
-    st.session_state.update = False
-
-if 'outy' not in st.session_state:
-    st.session_state.outy = ''
-
+if 'ret_output' not in st.session_state:
+    st.session_state.ret_output = "init"
+    
+if 'clef' not in st.session_state:
+    st.session_state.clef = "1"
 
 with st.sidebar:
     st.subheader('Sessions')
@@ -35,7 +34,9 @@ with st.sidebar:
     sessions, client = get_database(name)
     list_session_prompt = [str(y['prompt'][:25]+'...') for y in sessions]
     list_session_prompt.insert(0, 'New_prompt...')
+    sidebar_change = False
     selected_option = st.radio('Select Past Prompt', [y for y in list_session_prompt])
+                            #    , on_change=onchange_sidebar)
     if selected_option != 'New_prompt...':
         selected_index = list_session_prompt.index(selected_option)
         ret_, nom, prompt_ = variable_session(selected_index, name)
@@ -62,11 +63,14 @@ st.title("Prototype Chat_GPT")
 # for y in collection.find():
 #     st.write(y)
 
+
 choosen_langage = st.selectbox(
     'Choisissez votre langage',
     ('python', 'JS', 'C'))
 
+
 Prompt = st.text_area(label= 'prompt',label_visibility='hidden', value=prompt, key=2)
+# , on_change= prompt_change)
 
 cols_up1, cols_up2 = st.columns([3,1])
 
@@ -86,7 +90,6 @@ if bip:
     insert_in_database(Prompt, ret, name)
     sessions, client = get_database(name)
     close_connection(client)
-
 
 
 
@@ -221,6 +224,3 @@ else:
     st.write("Désolé, on ne peut pas excécuter le {}.".format(choosen_langage))
 
 close_connection(client)
-
-
-

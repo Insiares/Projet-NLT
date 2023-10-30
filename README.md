@@ -27,7 +27,7 @@
 <h3 align="center">NLT : A swing at Natural Langage Transcoder</h3>
 
   <p align="center">
-    Our first aI pOwErEd app, aiming at helping noob programmers like us.
+    Our first aI pOwErEd app, helping noob programmers like us.
     <br />
     <br />
     <a href="https://github.com/Insiares/Projet-NLT/issues">Report Bug</a>
@@ -70,7 +70,9 @@
 ## About The Project
 
 
-Here's a blank template to get started: To avoid retyping too much info.
+Our first local application, asking OpenAI-API to write code for us. The NLT should provide code corresponding to your prompt, allowing you to save it and edit it. If you ask for python code, you may be able to run it! <br>
+<br>
+We made this for school as a way to hone our wobbly skills, and it shows.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -90,31 +92,44 @@ Here's a blank template to get started: To avoid retyping too much info.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+To get a local copy up and running follow these steps.
+You'll need python and docker to run this properly.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
+You should possess an OpenAI API key, and have it in your environnement variable under 'OPENAI_API_KEY'.
+
+
+* For Windows, inside a command prompt : 
   ```sh
-  npm install npm@latest -g
+  setx OPENAI_API_KEY "your-api-key-here"
   ```
+
+* Others : 
+  ```sh
+  export OPENAI_API_KEY='your-api-key-here'
+  ```
+
+_In case we were dumb enough to miss a step, please refer to [OpenAI API documentation](https://platform.openai.com/docs/quickstart )._
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+
+1. Clone the repo
    ```sh
    git clone https://github.com/Insiares/Projet-NLT.git
    ```
-3. Install NPM packages
+3. Install required packages
    ```sh
-   npm install
+   pip install requirements.txt
    ```
-4. Enter your API in `config.js`
+4. Get the docker running
    ```js
    const API_KEY = 'ENTER YOUR API';
+   ```
+4. CD into your directory, and run the app inside your browser
+   ```py
+   streamlit run app.py
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

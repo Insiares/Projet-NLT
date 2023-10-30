@@ -34,6 +34,7 @@ def get_database(name):
     # Return the result and the MongoDB client
     return result, client
 
+
 def insert_in_database(prompt, result, name):
     """
     This function inserts a document into a MongoDB collection.
@@ -56,19 +57,21 @@ def insert_in_database(prompt, result, name):
 
 def update_database(prompt, result, new_result, name):
     """
-    This function connects to a MongoDB database and updates the collection
-    with the given name, result, and prompt.
-    Args:
-        prompt (str): The prompt for the document.
-        result (str): The result for the document.
-        name (str): The username for the document.
+    Update the database with the given parameters.
+
+    :param prompt: The prompt to search for.
+    :param result_: The result to search for.
+    :param name: The username to search for.
+    :param ret_output: The new result to update with.
     """
-    # Establish a connection to MongoDB
+    # Connect to MongoDB
     client, collection = connect_mongodb()
+
     # Update the document in the collection
     collection.update_many({"prompt": prompt, "result": result, "username": name}, {"$set": {"result": new_result}})
     # Return the result and the MongoDB client
     close_connection(client)
+
 
 def close_connection(client):
     """
