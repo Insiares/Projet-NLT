@@ -3,6 +3,7 @@ app_old.py
 mongodb_old
 Prototype_NLT/Components/__pycache__/
 Prototype_NLT/Database/__pycache__/
+Prototype_NLT/__pycache__/
 Prototype_NLT/app_old.py
 Prototype_NLT/test.py
 test_API.py

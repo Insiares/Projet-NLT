@@ -124,10 +124,12 @@ _In case we were dumb enough to miss a step, please refer to [OpenAI API documen
    pip install requirements.txt
    ```
 4. Get the docker running
-   ```js
-   const API_KEY = 'ENTER YOUR API';
+   ```sh
+   cd ./Prototype_NLT/
+   docker context create compose
+   docker-compose -f docker-compose.yml up -d
    ```
-4. CD into your directory, and run the app inside your browser
+4. CD into your /Prototype_NLT/ directory, and run the app inside your browser
    ```py
    streamlit run app.py
    ```
@@ -139,9 +141,14 @@ _In case we were dumb enough to miss a step, please refer to [OpenAI API documen
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Enter your demand in the first text area, if you modify it and want to ask again, don't forget to validate by hitting CTRL+Enter.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+The outputed code is displayed below in an editor. You can play with the code, and even run it (If giant pasta god's willing). If you want to keep your code for further use, hit run at least once to save it inside the database. 
+
+You can then load previous session in the left sidebar. Choose your prompt and load it.
+
+Might still be buggy, you can [open an issue](https://github.com/Insiares/Projet-NLT/issues).
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -152,10 +159,10 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 - [x] Prototype
 - [x] Session Recording
-- [ ] Save-enabled editable code block.
-- [ ] Execute outputed code.
-- [ ] Prompt Engineering
-    - [ ] More Langages
+- [X] Save-enabled editable code block.
+- [X] Execute outputed code.
+- [~] Prompt Engineering
+    - [~] More Langages
     - [ ] Different assistant personality
 
 See the [open issues](https://github.com/Insiares/Projet-NLT/issues) for a full list of proposed features (and known issues).

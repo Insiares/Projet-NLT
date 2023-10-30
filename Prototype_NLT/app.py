@@ -1,115 +1,30 @@
+import streamlit as st 
 from Components.Call_API import call_gpt
-from Components.utils_streamlit import variable_session, click_prompt, reset_prompt
-import streamlit as st
-from time import time
+from Components.utils_streamlit import variable_session, run_disable, enable
 from Database.mongodb import insert_in_database, get_database, close_connection, update_database
-from execbox import execbox
-import sys
-import json
-from code_editor import code_editor
 import sys
 from io import StringIO
-import openai
-import pandas as pd
+from code_editor import code_editor
+import json
+# ----------------------- session state declaration -----------------------
+if 'prompt' not in st.session_state:
+    st.session_state.prompt = ' '
 
+if 'running' not in st.session_state:
+    st.session_state.running = False
 
+if 'result' not in st.session_state:
+    st.session_state.result = ' '
 
-#-----------------------------------------------Declare logics----------------------------------------
-if 'prompted' not in st.session_state:
-    st.session_state.prompted = False
+if 'name' not in st.session_state:
+    st.session_state.name = 'anon'
 
-if 'ret_output' not in st.session_state:
-    st.session_state.ret_output = "init"
-    
-if 'clef' not in st.session_state:
-    st.session_state.clef = "1"
-
-with st.sidebar:
-    st.subheader('Sessions')
-    st.button('Debug', on_click=reset_prompt)
-    name = st.text_input(label= 'Nom',label_visibility='hidden',placeholder=f"Entrez votre nom", value='Anonyme')
-
-#Declaring a sidebar with session History
-with st.sidebar: 
-    sessions, client = get_database(name)
-    list_session_prompt = [str(y['prompt'][:25]+'...') for y in sessions]
-    list_session_prompt.insert(0, 'New_prompt...')
-    sidebar_change = False
-    selected_option = st.radio('Select Past Prompt', [y for y in list_session_prompt])
-                            #    , on_change=onchange_sidebar)
-    if selected_option != 'New_prompt...':
-        selected_index = list_session_prompt.index(selected_option)
-        ret_, nom, prompt_ = variable_session(selected_index, name)
-        ret=ret_
-        prompt = prompt_
-    else:
-        ret = None
-        prompt = None
-
-
-
-def update():
-    print(st.session_state.outy)
-#-----------------------------------------------//Declare logics//----------------------------------------
-
-
-#-----------------------------------------------Layout ----------------------------------------
-
-st.title("Prototype Chat_GPT")
-
-# # debug db
-# client, collection = connection_mongodb()
-
-# for y in collection.find():
-#     st.write(y)
-
-
-choosen_langage = st.selectbox(
-    'Choisissez votre langage',
-    ('python', 'JS', 'C'))
-
-
-Prompt = st.text_area(label= 'prompt',label_visibility='hidden', value=prompt, key=2)
-# , on_change= prompt_change)
-
-cols_up1, cols_up2 = st.columns([3,1])
-
-with cols_up2:
-    bip = st.button(label="Generate", on_click=click_prompt, disabled=st.session_state.prompted)
-
-#splitting bottom of page
-cols_bot1, cols_bot2 = st.columns(2)
-
-
-
-if bip:
-    heure = time()
-    ret = call_gpt(Prompt, choosen_langage)
-    duree = round((time() - heure), 2)
-    st.write(f" Le résultat a mis {duree} secondes à être généré")
-    insert_in_database(Prompt, ret, name)
-    sessions, client = get_database(name)
-    close_connection(client)
-
-
-
-# with cols_bot1:
-#     Output = st.text_area(label='AI Output', label_visibility='hidden', value=ret, key='outy', height=200, on_change=update)
-    #TO_DO : on_change= update_DB()
-# with cols_bot2:
-#     st.write('')
-#     st.write('')
-#     st.markdown(Output)
-with cols_up2:
-    st.button(label='Prompt Again', on_click=reset_prompt, disabled=not st.session_state.prompted)
-
-
-def excecuter(retour=ret):
+def excecuter(retour=st.session_state.result):
     old_stdout = sys.stdout
     new_stdout = StringIO()
     sys.stdout = new_stdout
     try:
-        if ret:
+        if st.session_state.result:
             # Exécutez le code
             # execbox(ret)
             exec(retour)
@@ -123,7 +38,83 @@ def excecuter(retour=ret):
         # Restaurer
         sys.stdout = old_stdout
 
+# ------------------------- App Layout ------------------------------------
+#title
+st.title('NLT By LesNuls')
 
+#Sidebar
+with st.sidebar: 
+    sessions, client = get_database(st.session_state.name)
+    list_session_prompt = [str(y['prompt'][:25]+'...') for y in sessions]
+
+    if st.button('Reset'):
+        st.session_state.result = ' '
+        st.session_state.prompt = ' '
+        list_session_prompt.insert(0, 'Empty Prompt')
+
+    st.subheader('Sessions')
+
+    st.text_input(label= 'Your Name',
+                    # label_visibility='hidden',
+                         placeholder=f"Enter your name", 
+                         value='Anonyme',
+                         key='name')
+   
+    option = st.radio(label='Select Past Prompt',options=[y for y in list_session_prompt])
+
+    # if option is not None:
+    #     selected_index = list_session_prompt.index(option)
+    #     ret_, nom, prompt_ = variable_session((selected_index), st.session_state.name)
+    #     st.session_state.result =ret_
+    #     st.session_state.prompt = prompt_
+
+    if st.button('Load'):
+        if option is not None:
+            selected_index = list_session_prompt.index(option)
+            ret_, nom, prompt_ = variable_session((selected_index), st.session_state.name)
+            st.session_state.result =ret_
+            st.session_state.prompt = prompt_
+
+        if option is None:
+            list_session_prompt.insert(0, 'Empty Prompt')
+            st.session_state.result = ' '
+            st.session_state.prompt = ' '
+    theme = st.selectbox("theme:", ["dark", "light", "contrast"])
+
+    #Select lang
+    choosen_langage = st.selectbox(
+        'Choisissez votre langage',
+        ('python', 'JS', 'C'))
+    language = choosen_langage 
+
+    # with st.expander("Settings"):
+    col_a, col_b, col_c, col_cb = st.columns([6,11,3,3])
+    col_c.markdown('<div style="height: 2.5rem;"><br/></div>', unsafe_allow_html=True)
+    col_cb.markdown('<div style="height: 2.5rem;"><br/></div>', unsafe_allow_html=True)
+
+    col_d, col_e, col_f = st.columns([1,1,1])
+    
+    
+
+
+    
+#Input Area for prompt
+st.text_area(
+             label_visibility='visible',
+             value=st.session_state.prompt,
+             key='prompt',
+             on_change=enable,
+             label= '''Enter your demand in this area, 
+             if you modify it and want to ask again, 
+             don't forget to validate by hitting CTRL+Enter''',)
+
+if st.button(label='Generate', on_click=run_disable, disabled=st.session_state.running):
+    with st.spinner('Working AI magic...'):
+        st.session_state.result = call_gpt(st.session_state.prompt)
+        st.success('Done!', icon='✅')
+        insert_in_database(st.session_state.prompt, st.session_state.result, st.session_state.name)
+        sessions, client = get_database(st.session_state.name)
+        close_connection(client)
 
 with open('Components/custom_buttons.json') as json_button_file_alt:
     custom_buttons_alt = json.load(json_button_file_alt)
@@ -166,60 +157,27 @@ focus=False
 wrap=True
 btns = custom_buttons_alt
 
-theme = st.selectbox("theme:", ["dark", "light", "contrast"])
 
 
-# with st.expander("Settings"):
-col_a, col_b, col_c, col_cb = st.columns([6,11,3,3])
-col_c.markdown('<div style="height: 2.5rem;"><br/></div>', unsafe_allow_html=True)
-col_cb.markdown('<div style="height: 2.5rem;"><br/></div>', unsafe_allow_html=True)
-
-# height_type = col_a.selectbox("height format:", ["css", "max lines", "min-max lines"], index=2)
-# if height_type == "css":
-#     height = col_b.text_input("height (CSS):", "400px")
-# elif height_type == "max lines":
-#     height = col_b.slider("max lines:", 1, 40, 22)
-# elif height_type == "min-max lines":
-# height = col_b.slider("min-max lines:", 1, 40, (19, 22))
-
-col_d, col_e, col_f = st.columns([1,1,1])
-language = choosen_langage
-    # theme = col_e.selectbox("theme:", ["default", "light", "dark", "contrast"])
-    # shortcuts = col_f.selectbox("shortcuts:", ["emacs", "vim", "vscode", "sublime"], index=2)
-    # focus = col_c.checkbox("focus", False)
-    # wrap = col_cb.checkbox("wrap", True)
 
 with st.expander("Components"):
-#     c_buttons = st.checkbox("custom buttons (JSON)", True)
-#     if c_buttons:
 
     code_editor(json.dumps(custom_buttons_alt, indent=2), lang="json", height = 8, buttons=btn_settings_editor_btns)
 
-# if response_dict_btns['type'] == "submit" and len(response_dict_btns['text']) != 0:
-#     btns = json.loads(response_dict_btns['text'])
-    # else:
-    #     btns = []
-        
-    # i_bar = st.checkbox("info bar (JSON)", False)
-    # if i_bar:
-    #     response_dict_info = code_editor(json.dumps(info_bar, indent=2), lang="json", height = 8, buttons=btn_settings_editor_btns)
-    
-    #     if response_dict_info['type'] == "submit" and len(response_dict_info['text']) != 0:
-    #         info_bar = json.loads(response_dict_info['text'])
-    # else:
-    #     info_bar = {}
 
 st.write("### Output:")
+st.write('You can edit your code, run it to save changes.')
 # construct props dictionary (->Ace Editor)
 ace_props = {"style": {"borderRadius": "0px 0px 8px 8px"}}
-response_dict = code_editor(ret,  height = height, lang=language, theme=theme, shortcuts=shortcuts, focus=focus, buttons=btns, info=info_bar, props=ace_props, options={"wrap": wrap}, allow_reset=True, key="code_editor_demo")
+response_dict = code_editor(st.session_state.result,  height = height, lang=language, theme=theme, shortcuts=shortcuts, focus=focus, buttons=btns, info=info_bar, props=ace_props, options={"wrap": wrap}, allow_reset=True, key="code_editor_demo")
 
+st.write("### Result:")
 if response_dict['type'] == "submit" and len(response_dict['id']) != 0 and choosen_langage == "python":
     btns = response_dict["text"]
-    update_database(prompt=Prompt, result=ret, new_result=btns, name=name) # update_database(prompt=Prompt, result=ret, new_result=btns, name=name)
+    update_database(prompt=st.session_state.prompt, result=st.session_state.result, new_result=btns, name=st.session_state.name) # update_database(prompt=Prompt, result=ret, new_result=btns, name=name)
     excecuter(str(btns))
 elif choosen_langage == "python":
-    excecuter(ret)
+    excecuter(st.session_state.result)
 else:
     st.write("Désolé, on ne peut pas excécuter le {}.".format(choosen_langage))
 
