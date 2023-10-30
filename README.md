@@ -27,7 +27,7 @@
 <h3 align="center">NLT : A swing at Natural Langage Transcoder</h3>
 
   <p align="center">
-    Our first aI pOwErEd app, aiming at helping noob programmers like us.
+    Our first aI pOwErEd app, helping noob programmers like us.
     <br />
     <br />
     <a href="https://github.com/Insiares/Projet-NLT/issues">Report Bug</a>
