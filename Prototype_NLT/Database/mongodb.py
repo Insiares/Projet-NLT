@@ -17,22 +17,6 @@ def connect_mongodb():
     # Return the client and the 'utilisateurs' collection
     return client, collection
 
-def insert_in_database(prompt, result, name):
-    """
-    This function inserts a document into a MongoDB collection.
-    Args:
-        prompt (str): The prompt for the document.
-        result (str): The result for the document.
-        name (str): The username for the document.
-    """
-    # Establish MongoDB connection and get the collection
-    client, collection = connect_mongodb()
-    # Insert the document into the collection
-    collection.insert_many([
-        {"prompt": prompt, "result": result, "username": name}
-    ])
-    # Close the MongoDB connection
-    client.close()
 
 def get_database(name):
     """
@@ -51,7 +35,27 @@ def get_database(name):
     return result, client
 
 
-def update_database(prompt, result_, name, ret_output):
+def insert_in_database(prompt, result, name):
+    """
+    This function inserts a document into a MongoDB collection.
+    Args:
+        prompt (str): The prompt for the document.
+        result (str): The result for the document.
+        name (str): The username for the document.
+    """
+    # Establish MongoDB connection and get the collection
+    client, collection = connect_mongodb()
+    # Tester l'existence du prompt
+    if collection.find_one({"prompt": prompt}):
+        return "Prompt already exists"
+    # Insert the document into the collection
+    collection.insert_many([
+        {"prompt": prompt, "result": result, "username": name}
+    ])
+    # Close the MongoDB connection
+    client.close()
+
+def update_database(prompt, result, new_result, name):
     """
     Update the database with the given parameters.
 
@@ -62,19 +66,12 @@ def update_database(prompt, result_, name, ret_output):
     """
     # Connect to MongoDB
     client, collection = connect_mongodb()
-    
-    # Define the search query
-    search_query = {"prompt": prompt, "result": result_, "username": name}
-    
-    # Define the update operation
-    update_operation = {"$set": {"result": ret_output}}
-    
-    # Update the documents in the collection
-    collection.update_many(search_query, update_operation)
-    
-    # Close the MongoDB connection
-    client.close()
-    
+
+    # Update the document in the collection
+    collection.update_many({"prompt": prompt, "result": result, "username": name}, {"$set": {"result": new_result}})
+    # Return the result and the MongoDB client
+    close_connection(client)
+
 
 def close_connection(client):
     """
