@@ -20,7 +20,7 @@ if 'result' not in st.session_state:
     st.session_state.result = ' '
 
 if 'name' not in st.session_state:
-    st.session_state.name = 'anon'
+    st.session_state.name = 'Anonyme'
 
 def excecuter(retour=st.session_state.result):
     old_stdout = sys.stdout
