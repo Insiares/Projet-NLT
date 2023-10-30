@@ -121,7 +121,7 @@ _In case we were dumb enough to miss a step, please refer to [OpenAI API documen
    ```
 3. Install required packages
    ```sh
-   pip install requirements.txt
+   pip install -r requirements.txt
    ```
 4. Get the docker running
    ```sh
