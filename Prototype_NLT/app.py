@@ -20,25 +20,41 @@ if 'result' not in st.session_state:
     st.session_state.result = ' '
 
 if 'name' not in st.session_state:
-    st.session_state.name = 'anon'
+    st.session_state.name = 'Anonyme'
 
-def excecuter(retour=st.session_state.result):
+def execute_code(retour=st.session_state.result):
+    """
+    Execute the code stored in st.session_state.result and display the 
+    result or any error that occurs.
+    
+    :param retour: The code to be executed.
+    """
+    # Save the current stdout
     old_stdout = sys.stdout
+    
+    # Create a new StringIO object to capture stdout
     new_stdout = StringIO()
+    
+    # Assign the new_stdout to sys.stdout
     sys.stdout = new_stdout
+    
     try:
+        # If there is a result, execute the code
         if st.session_state.result:
-            # Exécutez le code
-            # execbox(ret)
             exec(retour)
+            
+            # Get the captured stdout
             result_text = new_stdout.getvalue()
+            
+            # Display the result
             st.write(result_text)
-
+            
     except Exception as e:
+        # Display any error that occurred
         st.error(f"Une erreur s'est produite : {e}")
-
+    
     finally:
-        # Restaurer
+        # Restore the original stdout
         sys.stdout = old_stdout
 
 # ------------------------- App Layout ------------------------------------
@@ -77,6 +93,7 @@ with st.sidebar:
             ret_, nom, prompt_ = variable_session((selected_index), st.session_state.name)
             st.session_state.result =ret_
             st.session_state.prompt = prompt_
+            print(ret_)
 
         if option is None:
             list_session_prompt.insert(0, 'Empty Prompt')
@@ -185,9 +202,9 @@ if response_dict['type'] == "submit" and len(response_dict['id']) != 0 and choos
     btns = response_dict["text"]
     #update database with edited code
     update_database(prompt=st.session_state.prompt, result=st.session_state.result, new_result=btns, name=st.session_state.name) # update_database(prompt=Prompt, result=ret, new_result=btns, name=name)
-    excecuter(str(btns))
+    execute_code(str(btns))
 elif choosen_langage == "python":
-    excecuter(st.session_state.result)
+    execute_code(st.session_state.result)
 else:
     #Maybe we should have decided from the beginning wether to write code and comments in engligh or french xD 
     st.write("Désolé, on ne peut pas excécuter le {}.".format(choosen_langage))
