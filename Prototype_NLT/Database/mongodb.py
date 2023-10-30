@@ -62,7 +62,7 @@ def update_database(prompt, result, new_result, name):
     :param prompt: The prompt to search for.
     :param result_: The result to search for.
     :param name: The username to search for.
-    :param ret_output: The new result to update with.
+    :param new_result: The new result to update with.
     """
     # Connect to MongoDB
     client, collection = connect_mongodb()

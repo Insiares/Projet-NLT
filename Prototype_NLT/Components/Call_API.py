@@ -1,7 +1,9 @@
 import openai
 import os
 
+#getting API key in environment
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
 
 def call_gpt(prompt, langage = 'python', style ='code'):
     """
@@ -9,7 +11,7 @@ def call_gpt(prompt, langage = 'python', style ='code'):
     It takes a prompt as input and returns the generated response.
     WIP : optional arguments to change coding langage and output style (pure code, or pegadogic output)
     """
-    # Define the messages for the chat completion
+    # dictionnary of different prompt
     langage_dict = { 'python' : 'You are a Python senior programmer.',
                       'JS' : 'You are a JavaScript senior programmer.',
                       'C' : 'You are a C senior programmer.'}
@@ -22,7 +24,7 @@ def call_gpt(prompt, langage = 'python', style ='code'):
                                 Help me understand with comments.
                     Only code or comments within a single code block in markdown are allowed.
          Do not write text outside the code block.'''}
-    
+    #declaring prompt message
     messages=[
         {"role": "system", "content": 
         f'''{langage_dict[langage]} {style_dict[style]}

@@ -6,7 +6,10 @@ import sys
 from io import StringIO
 from code_editor import code_editor
 import json
+
 # ----------------------- session state declaration -----------------------
+#intern function and session logics and declared in this section
+
 if 'prompt' not in st.session_state:
     st.session_state.prompt = ' '
 
@@ -39,14 +42,17 @@ def excecuter(retour=st.session_state.result):
         sys.stdout = old_stdout
 
 # ------------------------- App Layout ------------------------------------
+
 #title
 st.title('NLT By LesNuls')
 
 #Sidebar
 with st.sidebar: 
+    #getting the list of previous session
     sessions, client = get_database(st.session_state.name)
     list_session_prompt = [str(y['prompt'][:25]+'...') for y in sessions]
 
+    #a reset button might come in handy
     if st.button('Reset'):
         st.session_state.result = ' '
         st.session_state.prompt = ' '
@@ -54,20 +60,17 @@ with st.sidebar:
 
     st.subheader('Sessions')
 
+    #declaring session name
     st.text_input(label= 'Your Name',
                     # label_visibility='hidden',
                          placeholder=f"Enter your name", 
                          value='Anonyme',
                          key='name')
    
+   # radio buttons to choose different sessions
     option = st.radio(label='Select Past Prompt',options=[y for y in list_session_prompt])
 
-    # if option is not None:
-    #     selected_index = list_session_prompt.index(option)
-    #     ret_, nom, prompt_ = variable_session((selected_index), st.session_state.name)
-    #     st.session_state.result =ret_
-    #     st.session_state.prompt = prompt_
-
+    #Load button allowing to update the workplace
     if st.button('Load'):
         if option is not None:
             selected_index = list_session_prompt.index(option)
@@ -79,6 +82,8 @@ with st.sidebar:
             list_session_prompt.insert(0, 'Empty Prompt')
             st.session_state.result = ' '
             st.session_state.prompt = ' '
+
+    # Code_editor options
     theme = st.selectbox("theme:", ["dark", "light", "contrast"])
 
     #Select lang
@@ -108,14 +113,18 @@ st.text_area(
              if you modify it and want to ask again, 
              don't forget to validate by hitting CTRL+Enter''',)
 
+#Generate button
 if st.button(label='Generate', on_click=run_disable, disabled=st.session_state.running):
-    with st.spinner('Working AI magic...'):
+    with st.spinner('Working AI magic...'): # loading widget
+        #calling open ai api
         st.session_state.result = call_gpt(st.session_state.prompt)
         st.success('Done!', icon='✅')
+        #DB write
         insert_in_database(st.session_state.prompt, st.session_state.result, st.session_state.name)
         sessions, client = get_database(st.session_state.name)
         close_connection(client)
 
+#all of the following are code_editor logics for customisation
 with open('Components/custom_buttons.json') as json_button_file_alt:
     custom_buttons_alt = json.load(json_button_file_alt)
 
@@ -174,11 +183,13 @@ response_dict = code_editor(st.session_state.result,  height = height, lang=lang
 st.write("### Result:")
 if response_dict['type'] == "submit" and len(response_dict['id']) != 0 and choosen_langage == "python":
     btns = response_dict["text"]
+    #update database with edited code
     update_database(prompt=st.session_state.prompt, result=st.session_state.result, new_result=btns, name=st.session_state.name) # update_database(prompt=Prompt, result=ret, new_result=btns, name=name)
     excecuter(str(btns))
 elif choosen_langage == "python":
     excecuter(st.session_state.result)
 else:
+    #Maybe we should have decided from the beginning wether to write code and comments in engligh or french xD 
     st.write("Désolé, on ne peut pas excécuter le {}.".format(choosen_langage))
 
 close_connection(client)

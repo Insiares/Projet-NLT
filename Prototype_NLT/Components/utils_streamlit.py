@@ -26,7 +26,7 @@ def variable_session(index_session, name):
     # Return the result, username, and prompt
     return ret, name, prompt
 
-
+# switch function for enabling and disabling buttons
 def run_disable():
     st.session_state.running = True
 
